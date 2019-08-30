@@ -6,7 +6,7 @@ class MockBoard : public Board {
  public:
   int recentId_;
   MockBoard(int w, int h) : Board(w,h) { }
-  virtual void addWorm(WormType type, int x, int y) override {
+  virtual void addWorm(WormType, int x, int y) override {
     board_[x][y] = nextId_;
     recentId_ = nextId_;
     nextId_++;
@@ -27,7 +27,7 @@ class MockWorm : public Worm {
 class MockBoardNoUpdate : public Board {
  public:
   MockBoardNoUpdate(int w, int h) : Board(w, h) { }
-  virtual void update(int id, int oldX, int oldY, int newX, int newY) override { }
+  virtual void update(int, int, int, int, int) override { }
 };
 
 TEST(wormTest, testWormMove) {

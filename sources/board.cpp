@@ -2,19 +2,24 @@
 
 
 Board::Board(int width, int height) : nextId_{1}, killAll_{false} {
+  if (width <= 0 or height <= 0)
+      throw std::invalid_argument("Invalid board size. Should be grater than 0.");
   board_.resize(height);
   for (int i = 0; i < (int)board_.size(); ++i)
     board_[i].resize(width);
 }
 
 void Board::addWorm(WormType type, int x, int y) {
-  // TODO: Implement the body of the function. It should add a worm
-  // into the board_ and start a new thread which will invoke
-  // call operator - operator()(int) - defined in Worm class.
-  // Note: there are a few class members (like wormTypes_) that need to be
-  // updated as well to have full information about the worm that is being
-  // added. They are usually based on worm's id which should be uniquely given
-  // here.
+    int id = getNextId();
+
+    board_[x][y] = id;
+    wormTypes_[id] = type;
+    switch (type) {
+        case Lazy: worms_[id] = std::thread(LazyWorm(x, y, this), id);
+            break;
+        case Hunter: worms_[id] = std::thread(HunterWorm(x, y, this), id);
+            break;
+    }
 }
 
 void Board::update(int id, int oldX, int oldY, int newX, int newY) {
@@ -38,4 +43,16 @@ void Board::clearDead() {
     for (int j = 0; j < (int)board_[0].size(); ++j)
       if (killed_.find(board_[i][j]) != killed_.end())
         board_[i][j] = 0;
+}
+
+Board::~Board()  {
+    killAll();
+    for (auto &worm_thread : worms_)
+        worm_thread.second.join();
+}
+
+int Board::at(int x, int y) const {
+    if (x < 0 or y < 0 or x >= getHeight() or y >= getWidth())
+        return -1;
+    return board_[x][y];
 }

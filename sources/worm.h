@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <thread>
+#include <mutex>
 
 constexpr int LEFT = 0, UP = 1, RIGHT = 2, DOWN = 3;
 
@@ -9,6 +10,8 @@ class Board;
 
 class Worm {
  protected:
+  static std::mutex mutex_;
+
   int id_;
   int x_, y_; // Coordinates
   int currDir_;
