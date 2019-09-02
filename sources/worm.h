@@ -10,8 +10,6 @@ class Board;
 
 class Worm {
  protected:
-  static std::mutex mutex_;
-
   int id_;
   int x_, y_; // Coordinates
   int currDir_;

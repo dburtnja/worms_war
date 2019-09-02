@@ -15,14 +15,18 @@ void Board::addWorm(WormType type, int x, int y) {
     board_[x][y] = id;
     wormTypes_[id] = type;
     switch (type) {
-        case Lazy: worms_[id] = std::thread(LazyWorm(x, y, this), id);
+        case Lazy: emplace_worm<LazyWorm>(id, x, y);
             break;
-        case Hunter: worms_[id] = std::thread(HunterWorm(x, y, this), id);
+        case Hunter: emplace_worm<HunterWorm>(id, x, y);
             break;
     }
 }
 
 void Board::update(int id, int oldX, int oldY, int newX, int newY) {
+  std::unique_lock<std::mutex> l(mutex_);
+
+  if (checkKill(id))
+      return;
   int targetId = board_[newX][newY];
   if (targetId != 0 && targetId != id)
     killed_.insert(targetId);
@@ -30,7 +34,7 @@ void Board::update(int id, int oldX, int oldY, int newX, int newY) {
   board_[newX][newY] = id;
 }
 
-bool Board::checkKill(int id) {
+bool Board::checkKill(int id) const {
   return killAll_ || killed_.find(id) != killed_.end();
 }
 
@@ -55,4 +59,17 @@ int Board::at(int x, int y) const {
     if (x < 0 or y < 0 or x >= getHeight() or y >= getWidth())
         return -1;
     return board_[x][y];
+}
+
+template<typename T>
+void Board::emplace_worm(int id, int x, int y) {
+    worms_.emplace(
+            std::piecewise_construct,
+            std::forward_as_tuple(id),
+            std::forward_as_tuple(T(x, y, this), id)
+    );
+}
+
+bool Board::isWormAt(int x, int y) const {
+    return board_[x][y] != 0;
 }

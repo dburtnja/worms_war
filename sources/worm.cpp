@@ -15,10 +15,7 @@ using std::unordered_set;
 using std::hash;
 using std::vector;
 
-std::mutex Worm::mutex_;
-
 void Worm::move() {
-  std::unique_lock<std::mutex> l(mutex_);
   int oldX = x_, oldY = y_;
   int board_width = board_->getWidth();
   int board_height = board_->getHeight();
@@ -59,10 +56,6 @@ void LazyWorm::run() {
     } else if (dice == 1) { // turn left
       (int)currDir_--;
       if (currDir_ < 0) currDir_ += 4;
-    }
-    if (board_->checkKill(id_)) {
-        alive = false;
-        break;
     }
     this->move();
   }
@@ -108,10 +101,6 @@ void HunterWorm::run() {
 
     if(!dirs.empty())
       currDir_ = dirs[rand() % dirs.size()];
-    if (board_->checkKill(id_)) {
-          alive = false;
-          break;
-    }
     this->move();
   }
   std::cout << "Id " << id_ << " has died\n";
