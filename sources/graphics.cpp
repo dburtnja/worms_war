@@ -93,7 +93,7 @@ void WormArea::forceRedraw()
 // Static function to set up and run the application.
 int Graphics::createAndRun(int argc, char** argv,
     int width, int height, bool debug) {
-  auto app = Gtk::Application::create(argc, argv, "Worms");
+  auto app = Gtk::Application::create(argc, argv, "org.gtkmm.worms");
   Graphics window(width, height, debug);
   return app->run(window);
 }

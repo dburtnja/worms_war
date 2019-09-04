@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <iostream>
+#include <mutex>
 
 using std::pair;
 using std::make_pair;
@@ -16,11 +17,24 @@ using std::vector;
 
 void Worm::move() {
   int oldX = x_, oldY = y_;
+  int board_width = board_->getWidth();
+  int board_height = board_->getHeight();
 
-  // TODO: Implement the body of the function. It should perform one step
-  // based on currDir_ and modify class variables x_ and y_.
-
-  board_->update(id_,oldX,oldY,x_,y_);
+  switch (currDir_) {
+      case RIGHT:
+          x_ = (x_ + 1) % board_width;
+          break;
+      case UP:
+          y_ = (y_ + 1) % board_height;
+          break;
+      case LEFT:
+          x_ > 0 ? --x_ : board_width - 1;
+          break;
+      case DOWN:
+          y_ > 0 ? --y_ : board_height - 1;
+          break;
+  }
+  board_->update(id_,oldX,oldY, x_, y_);
 }
 
 void LazyWorm::run() {
