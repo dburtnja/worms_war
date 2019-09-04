@@ -6,5 +6,5 @@
 
 int main(int argc, char** argv) {
   std::cout << "Worms app\n";
-  return Graphics::createAndRun(argc, argv, 20, 20, true);
+  return Graphics::createAndRun(argc, argv, 100, 100, false);
 }

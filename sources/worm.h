@@ -30,7 +30,7 @@ class Worm {
 class LazyWorm : public Worm {
  public:
   LazyWorm(int x, int y, Board* b) : Worm(x,y,b) { }
-  void run();
+  void run() override ;
 };
 
 class HunterWorm : public Worm {
@@ -41,5 +41,11 @@ class HunterWorm : public Worm {
   std::pair<int,int> findClosest(int id, std::pair<int,int> start);
  public:
   HunterWorm(int x, int y, Board* b) : Worm(x,y,b) { }
-  void run();
+  void run() override ;
+};
+
+class UserWorm : public Worm {
+public:
+    UserWorm(int x, int y, Board *board) : Worm(x, y, board) { }
+    void run() override ;
 };

@@ -14,6 +14,8 @@ WormArea::WormArea(int width, int height)
     board_.addWorm(Hunter, rand() % board_.getWidth(),
                    rand() % board_.getHeight());
   }
+  board_.addWorm(User, board_.getWidth() / 2, board_.getHeight() / 2);
+  add_events(Gdk::ALL_EVENTS_MASK);
 }
 
 bool WormArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
@@ -32,17 +34,22 @@ bool WormArea::on_draw(const Cairo::RefPtr<Cairo::Context>& cr) {
   for (int y = 0; y < bHeight; ++y) {
     for (int x = 0; x < bWidth; ++x) {
       if (!board_.isWormAt(x,y)) continue;
-      if (board_.getWormType(board_.at(x,y)) == Hunter)
-        cr->set_source_rgb(1.0,0.0,0.0);
 
-      // Draw circle
+      int id = board_.at(x, y);
+      if (board_.getWormType(id) == Hunter)
+        cr->set_source_rgb(1.0,0.0,0.0);
+      if (board_.getWormType(id) == User)
+        cr->set_source_rgb(0.0,1.0,0.0);
+
+        // Draw circle
+      double radious = (std::min(fieldWidth,fieldHeight) / 2.5) * board_.getWormSize(id);
       cr->arc(x*fieldWidth + fieldWidth/2, y*fieldHeight + fieldHeight/2,
-              std::min(fieldWidth,fieldHeight) / 2.5, 0.0, 2.0 * M_PI);
+              radious, 0.0, 2.0 * M_PI);
       if (debug_) {
         cr->stroke();
         // Draw id inside circle
         this->drawText(cr, x*fieldWidth + fieldWidth/2,
-            y*fieldHeight + fieldHeight/2, board_.at(x,y));
+            y*fieldHeight + fieldHeight/2, id);
       } else {
         // Fill the circle
         cr->fill_preserve();
@@ -88,6 +95,20 @@ void WormArea::forceRedraw()
                      get_allocation().get_height());
     win->invalidate_rect(r, false);
   }
+}
+
+bool WormArea::on_motion_notify_event(GdkEventMotion *eventMotion) {
+    Gtk::Allocation allocation = get_allocation();
+    const int width = allocation.get_width();
+    const int height = allocation.get_height();
+
+    const int bWidth = board_.getWidth();
+    const int bHeight = board_.getHeight();
+
+    double x = (eventMotion->x * bWidth) / width;
+    double y = (eventMotion->y * bHeight) / height;
+    board_.setMousePosition(x, y);
+    return true;
 }
 
 // Static function to set up and run the application.
