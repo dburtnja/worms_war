@@ -15,10 +15,17 @@ void Board::addWorm(WormType type, int x, int y) {
     board_[x][y] = id;
     wormTypes_[id] = type;
     switch (type) {
-        case Lazy: emplace_worm<LazyWorm>(id, x, y);
+        case Lazy:
+            emplace_worm<LazyWorm>(id, x, y);
+            wormsInfo_[id] = {2};
             break;
-        case Hunter: emplace_worm<HunterWorm>(id, x, y);
+        case Hunter:
+            emplace_worm<HunterWorm>(id, x, y);
+            wormsInfo_[id] = {3};
             break;
+        case User:
+            emplace_worm<UserWorm>(id, x, y);
+            wormsInfo_[id] = {2};
     }
 }
 
@@ -27,11 +34,23 @@ void Board::update(int id, int oldX, int oldY, int newX, int newY) {
 
   if (checkKill(id))
       return;
+  int survivorId = id;
   int targetId = board_[newX][newY];
-  if (targetId != 0 && targetId != id)
-    killed_.insert(targetId);
+  if (targetId != 0 && targetId != id) {
+      int &size = wormsInfo_[id].size;
+      int &targetSize = wormsInfo_[targetId].size;
+
+      if (size >= targetSize) {
+        size += targetSize;
+        killed_.insert(targetId);
+      } else {
+        targetSize += size;
+        killed_.insert(id);
+        survivorId = targetId;
+      }
+  }
   board_[oldX][oldY] = 0;
-  board_[newX][newY] = id;
+  board_[newX][newY] = survivorId;
 }
 
 bool Board::checkKill(int id) const {
@@ -72,4 +91,20 @@ void Board::emplace_worm(int id, int x, int y) {
 
 bool Board::isWormAt(int x, int y) const {
     return board_[x][y] != 0;
+}
+
+int Board::getWormSize(int id) const {
+    try {
+        return wormsInfo_.at(id).size;
+    } catch (std::out_of_range &e) {
+        throw std::out_of_range("Id '" + std::to_string(id) + "' don't exist.");
+    }
+}
+
+void Board::setMousePosition(int x, int y) {
+    mouseCoordinates_ = {x, y};
+}
+
+const Coordinates &Board::getMousePosition() const {
+    return mouseCoordinates_;
 }

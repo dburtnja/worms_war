@@ -91,13 +91,17 @@ void HunterWorm::run() {
     int newId = board_->at(goalPos_.first, goalPos_.second);
     goalId_ = newId > 0 ? newId : -1;
 
+    int goalSize = board_->getWormSize(goalId_);
+    int size = board_->getWormSize(id_);
+
     vector<int> dirs;
     int dx = goalPos_.first - myPos.first,
         dy = goalPos_.second - myPos.second;
-    if (dx > 0) dirs.push_back(RIGHT);
-    if (dx < 0) dirs.push_back(LEFT);
-    if (dy > 0) dirs.push_back(UP);
-    if (dy < 0) dirs.push_back(DOWN);
+
+    if (dx > 0) dirs.push_back(goalSize <= size ? RIGHT : LEFT);
+    if (dx < 0) dirs.push_back(goalSize <= size ? LEFT : RIGHT);
+    if (dy > 0) dirs.push_back(goalSize <= size ? UP : DOWN);
+    if (dy < 0) dirs.push_back(goalSize <= size ? DOWN : UP);
 
     if(!dirs.empty())
       currDir_ = dirs[rand() % dirs.size()];
@@ -145,4 +149,30 @@ pair<int,int> HunterWorm::findClosest(int id, pair<int,int> start) {
   }
 
   return make_pair(-1,-1);
+}
+
+void UserWorm::run() {
+    while (alive) {
+        if (board_->checkKill(id_)) {
+            alive = false;
+            break;
+        }
+        // Pick waiting time between 0.1s and 1s.
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+
+        // Pick the direction - with probability 0.75 stay with current direction,
+        // with probability 0.125 turn right and with 0.125 turn left.
+        vector<int> dirs;
+
+        auto &coordinates = board_->getMousePosition();
+
+        int xDir = x_ - coordinates.x;
+        int yDir = y_ - coordinates.y;
+
+        if (std::abs(xDir) > std::abs(yDir))
+            currDir_ = xDir < 0 ? RIGHT : LEFT;
+        else
+            currDir_ = yDir < 0 ? UP : DOWN;
+        this->move();
+    }
 }

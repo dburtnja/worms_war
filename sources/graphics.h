@@ -12,6 +12,8 @@ class WormArea : public Gtk::DrawingArea {
   bool on_draw(const Cairo::RefPtr<Cairo::Context>& cr) override;
   void drawText(const Cairo::RefPtr<Cairo::Context>& cr, int x, int y, int id);
 
+  bool on_motion_notify_event(GdkEventMotion *eventMotion) override ;
+
  public:
   WormArea(int width, int height);
   virtual ~WormArea() { }
